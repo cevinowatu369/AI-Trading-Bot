@@ -1,0 +1,188 @@
+# AI Trading Bot Configuration
+# Last Updated: 2026-04-25
+
+# ============================================================================
+# MT5 CONNECTION SETTINGS
+# ============================================================================
+mt5:
+  account: 0              # Your MT5 account number
+  password: "password"    # Your MT5 password (use environment variable in production)
+  server: "MetaQuotes-Demo" # Server name
+  path: null             # MT5 installation path (auto-detect if null)
+  timeout: 30            # Connection timeout (seconds)
+
+# ============================================================================
+# TRADING PARAMETERS
+# ============================================================================
+trading:
+  symbol: "XAUUSD"       # Trading instrument
+  timeframe: "M5"        # Timeframe (M5 = 5 minutes, H1 = 1 hour)
+  risk_percentage: 1.0   # Risk per trade (%)
+  max_positions: 2       # Maximum concurrent positions
+  
+  # Stop Loss & Take Profit
+  stop_loss_multiplier: 1.5   # SL = ATR × multiplier
+  take_profit_multiplier: 2.0 # TP = Risk × multiplier
+  exit_hours: 4              # Exit if open > N hours
+  
+  # Daily Risk Management
+  daily_loss_limit: -2.0  # Stop trading if loss > -2%
+  daily_profit_target: 5.0 # Optional profit target
+
+# ============================================================================
+# TECHNICAL INDICATORS
+# ============================================================================
+indicators:
+  # Moving Averages
+  ema_short: 20   # Fast EMA period
+  ema_long: 50    # Slow EMA period
+  
+  # RSI (Relative Strength Index)
+  rsi_period: 14
+  rsi_overbought: 70
+  rsi_oversold: 30
+  rsi_neutral_upper: 55   # Neutral zone upper
+  rsi_neutral_lower: 45   # Neutral zone lower
+  
+  # ATR (Average True Range) - Volatility
+  atr_period: 14
+  
+  # MACD (Optional)
+  macd_fast: 12
+  macd_slow: 26
+  macd_signal: 9
+  
+  # Bollinger Bands (Optional)
+  bb_period: 20
+  bb_std_dev: 2.0
+
+# ============================================================================
+# ENTRY CONDITIONS
+# ============================================================================
+entry:
+  # BUY Signal Requirements
+  buy:
+    - ema_20_above_50: true      # EMA 20 > EMA 50
+    - price_above_ema20: true    # Price > EMA 20
+    - rsi_above_threshold: 50    # RSI > 50
+    - require_rsi_confirmation: true
+    - volatility_check: true     # ATR-based volatility
+    - check_news: false          # Skip high-impact news events
+  
+  # SELL Signal Requirements
+  sell:
+    - ema_20_below_50: true      # EMA 20 < EMA 50
+    - price_below_ema20: true    # Price < EMA 20
+    - rsi_below_threshold: 50    # RSI < 50
+    - require_rsi_confirmation: true
+    - volatility_check: true
+    - check_news: false
+
+# ============================================================================
+# EXIT CONDITIONS
+# ============================================================================
+exit:
+  # Stop Loss
+  use_atr_stop_loss: true
+  static_stop_loss: 50  # Pips (alternative to ATR)
+  
+  # Take Profit
+  use_atr_take_profit: true
+  static_take_profit: 100  # Pips (alternative to ATR)
+  
+  # Time-based Exit
+  exit_on_time: true
+  exit_hours: 4  # Exit after N hours
+  
+  # Trailing Stop
+  use_trailing_stop: true
+  trailing_stop_pips: 50
+
+# ============================================================================
+# EXECUTION SETTINGS
+# ============================================================================
+execution:
+  # Signal File Location
+  signal_file: "./signal.txt"
+  
+  # Execution Interval
+  run_interval_minutes: 5  # Run AI model every 5 minutes
+  
+  # Order Execution
+  order_type: "MARKET"     # MARKET or LIMIT
+  slippage_pips: 5         # Max allowed slippage
+  
+  # Retry Logic
+  max_retries: 3
+  retry_delay_seconds: 5
+  
+  # Demo Mode (no real trades)
+  demo_mode: false
+  log_only: false  # Only log signals, don't execute
+
+# ============================================================================
+# LOGGING & MONITORING
+# ============================================================================
+logging:
+  log_file: "./logs/trading_log.txt"
+  log_level: "INFO"  # DEBUG, INFO, WARNING, ERROR
+  max_log_size_mb: 10
+  keep_logs_days: 30
+  
+  # Detailed Logging
+  log_indicators: true      # Log all indicator values
+  log_market_data: true     # Log OHLC data
+  log_trades: true          # Log all trades
+  log_errors: true          # Log errors
+  
+  # Notifications
+  send_email_alerts: false
+  email_on_trade: true
+  email_on_error: true
+  email_address: "your-email@gmail.com"
+
+# ============================================================================
+# ADVANCED SETTINGS
+# ============================================================================
+advanced:
+  # Machine Learning Model
+  use_ml_model: true
+  model_type: "random_forest"  # random_forest, svm, neural_network
+  model_confidence_threshold: 0.65
+  
+  # Walk-Forward Optimization
+  enable_optimization: false
+  optimization_period_days: 30
+  
+  # Adaptive Parameters
+  use_adaptive_parameters: false
+  adapt_to_volatility: true
+  
+  # Market Sessions
+  only_trade_london: false
+  only_trade_ny: false
+  
+  # Correlation Analysis
+  check_correlation: true
+  correlation_symbols: ["EURUSD", "GBPUSD"]  # Related instruments
+  max_correlation: 0.8
+
+# ============================================================================
+# BACKTESTING
+# ============================================================================
+backtest:
+  enabled: false
+  start_date: "2025-01-01"
+  end_date: "2026-01-01"
+  initial_balance: 10000
+  use_real_spreads: true
+  include_commissions: true
+
+# ============================================================================
+# DATABASE (Optional)
+# ============================================================================
+database:
+  type: "sqlite"  # sqlite, mysql, postgresql
+  path: "./trading.db"
+  auto_backup: true
+  backup_days: 7
